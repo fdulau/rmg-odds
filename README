@@ -3,12 +3,8 @@ NAME
 
 SYNOPSIS
         my $oc = OddsConverter->new(probability => 0.5);
-        print $oc->decimal_odds;    # '2.00' (always to 2 decimal places)
+        print $oc->decimal;    # '2.00' (always to 2 decimal places)
         print $oc->roi;             # '100%' (always whole numbers or 'Inf.')
-
-COMMENT
-        This version use the 'old fashion' module declaration.
-        This easy the possibility to create a self contained package with PAR to distribute the module on computer with obsolete OS/PERL version.
 
 METHODS
     new()
@@ -20,27 +16,27 @@ METHODS
             *fractional*
             *decimal*
             *win_break*
-            *moeny_line*
+            *moneyline*
             *roi*
 
             Example:
 
                     my $oc = OddsConverter->new( probability => 0.5 );
 
-    decimal_odds
+    decimal
         Without parameter, return the decimal odds for the object
         instantiate with the parameter from the method new()
 
         Example:
 
-                print $oc->decimal_odds . "\n";
+                print $oc->decimal . "\n";
         
         With a parameter, re-initialise the object instance with that
         decimal value and return the new decimal odds value.
 
         Example:
 
-                print $oc->decimal_odds( 3 ) . "\n";
+                print $oc->decimal( 3 ) . "\n";
         
     roi Without parameter, return the roi ( return on investment ) for the
         object instantiate with the parameter from the method new()
@@ -56,43 +52,43 @@ METHODS
 
                 print $oc->roi( 50 ) . "\n";
                 
-    fractional_odds
+    fractional
         Without parameter, return the fractional odds for the object
         instantiate with the parameter from the method new()
 
         Example:
 
-                print $oc->fractional_odds . "\n";
+                print $oc->fractional . "\n";
         
         With a parameter, re-initialise the object instance with that
         fractional odds value and return the new fractional odds value
 
         Example:
 
-                print $oc->fractional_odds( 50 ) . "\n";
+                print $oc->fractional( 50 ) . "\n";
                         
-    win_break_odds
+    win_break
         Without parameter, return the win to break even odds for the object
         instantiate with the parameter from the method new()
 
         Example:
 
-                print $oc->win_break_odds . "\n";
+                print $oc->win_break . "\n";
         
         With a parameter, re-initialise the object instance with that
         win_break odds value and return the new win to break odds value
 
         Example:
 
-                print $oc->win_break_odds( 90 ) . "\n";
+                print $oc->win_break( 90 ) . "\n";
                         
-    probability_odds
+    probability
         Without parameter, return the probability odds for the object
         instantiate with the parameter from the method new()
 
         Example:
 
-                print $oc->probability_odds . "\n";
+                print $oc->probability . "\n";
         
         With a parameter, re-initialise the object instance with that
         probability odds value and return the new win to probability odds
@@ -100,22 +96,22 @@ METHODS
 
         Example:
 
-                print $oc->probability_odds( 90 ) . "\n";               
+                print $oc->probability( 90 ) . "\n";            
         
-    money_line_odds
+    moneyline
         Without parameter, return the moneyline odds for the object
         instantiate with the parameter from the method new()
 
         Example:
 
-                print $oc->money_line_odds . "\n";
+                print $oc->moneyline . "\n";
         
         With a parameter, re-initialise the object instance with that
         moneyline odds value and return the new win to moneyline odds value
 
         Example:
 
-                print $oc->moneyline_odds( 90 ) . "\n";         
+                print $oc->moneyline( 90 ) . "\n";              
         
 EXAMPLE
             #!/usr/bin/perl
@@ -129,23 +125,23 @@ EXAMPLE
             my $p = 0.5;
             my $oc = OddsConverter->new( probability => $p );
             say "Test probability ($p)";
-            say "decimal=" . $oc->decimal_odds;  
-            say "fractional=" . $oc->fractional_odds;
-            say "probability=" . $oc->probability_odds;
-            say "win_break=" . $oc->win_break_odds;
+            say "decimal=" . $oc->decimal;  
+            say "fractional=" . $oc->fractional;
+            say "probability=" . $oc->probability;
+            say "win_break=" . $oc->win_break;
             say "roi=" . $oc->roi;
-            say "money line=" . $oc->money_line_odds;
+            say "money line=" . $oc->money_line;
             say "";
         
             my $m = '-300';
             say "new from moneyline ($m)";
-            say "new money line=" . $oc->money_line_odds($m);
-            say "decimal=" . $oc->decimal_odds;  
-            say "fractional=" . $oc->fractional_odds;
-            say "probability=" . $oc->probability_odds;
-            say "win_break=" . $oc->win_break_odds;
+            say "new money line=" . $oc->money_line($m);
+            say "decimal=" . $oc->decimal;  
+            say "fractional=" . $oc->fractional;
+            say "probability=" . $oc->probability;
+            say "win_break=" . $oc->win_break;
             say "roi=" . $oc->roi;
-            say "money line=" . $oc->money_line_odds;
+            say "money line=" . $oc->money_line;
             say "";
         
 AUTHOR

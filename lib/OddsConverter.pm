@@ -1,4 +1,5 @@
 package OddsConverter;
+use Moose;
 
 =head1 NAME
 
@@ -7,13 +8,8 @@ OddsConverter
 =head1 SYNOPSIS
 
     my $oc = OddsConverter->new(probability => 0.5);
-    print $oc->decimal_odds;    # '2.00' (always to 2 decimal places)
+    print $oc->decimal;    # '2.00' (always to 2 decimal places)
     print $oc->roi;             # '100%' (always whole numbers or 'Inf.')
-
-=head1 COMMENT
-    
-    This version use the 'old fashion' module declaration.
-    This easy the possibility to create a self contained package with PAR to distribute the module on computer with obsolete OS/PERL version.
 
 =cut
 
@@ -21,11 +17,9 @@ use strict;
 use Carp;
 use Scalar::Util qw(looks_like_number);
 
-use fields qw{ probability probability_rounded fractional fractional_rounded win_break win_break_rounded decimal decimal_rounded moneyline roi roi_rounded};
-
 use vars qw( $VERSION );
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 =head1 METHODS
 
@@ -37,7 +31,6 @@ $VERSION = '0.01';
 Instanciate a new OddsConverter object
 a parameter is needed to start the conversion.
 	
-
 =over 
 
 =item List of possible parameters:
@@ -52,7 +45,7 @@ a parameter is needed to start the conversion.
 
 =item I<win_break>
 
-=item I<moeny_line>
+=item I<moneyline>
 
 =item I<roi>
 	
@@ -68,114 +61,91 @@ Example:
 
 =cut
 
-sub new
-{
-#  my ( $class ) = @_;
-
-    my $self = shift;
-    no strict "refs";
-    $self                  = fields::new( $self );
-
-    my $empty_flag;
-    if ( exists { @_ }->{ probability } )
-    {  
-        $empty_flag++;
-       	if ( ! looks_like_number( { @_ }->{ probability } ))
-	{
-	croak 'No non-numeric probabilities';
-	}
-        if ( { @_ }->{ probability } < 0 || { @_ }->{ probability } > 1 )
-        {
-            croak "Probability must in the range ]0,1]";
-        }
-
-	$self->{ probability } = sprintf("%.10g", { @_ }->{ probability });
-        _from_probability( $self );
-    }
-    if ( exists { @_ }->{ fractional } )
-    {  
-        $empty_flag++;
-        if ( { @_ }->{ fractional } < 0 )
-        {
-           croak  "Fractional must be a positive value";
-        }
-	$self->{ fractional }  = sprintf("%.10g", { @_ }->{ fractional });
-        _from_fractional( $self );
-    }
-    if ( exists { @_ }->{ decimal } )
-    {  
-        $empty_flag++;
-        if ( { @_ }->{ decimal } < 1 )
-        {
-            croak "Decimal must be greater than 1";
-        }
-	$self->{ decimal }     = sprintf("%.10g", { @_ }->{ decimal });
-        _from_decimal( $self );
-    }
-    if ( exists { @_ }->{ win_break } )
-    {  
-        $empty_flag++;
-    if ( { @_ }->{ win_break } < 0 || { @_ }->{ win_break } >= 100 )
-        {
-            croak "Win_break must in the range ]0,100[";
-        }
-	$self->{ win_break }   = { @_ }->{ win_break };
-        _from_win_break( $self );
-    }
-    if ( exists { @_ }->{ roi } )
-    {  
-        $empty_flag++;    
-	$self->{ roi }         = sprintf("%.10g", { @_ }->{ roi });
-        _from_roi( $self );
-    }
-    if ( exists { @_ }->{ moneyline } )
-    {  
-        $empty_flag++;    
-	$self->{ moneyline }   = { @_ }->{ moneyline };
-        _from_moneyline( $self );
-    }
-    
-    if ( $empty_flag != 1 )
-    {
-    croak "We need one and only one parameter in the constructor";  
- 
-    }
-    return $self;
-}
+has 'probability' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0,
+    trigger  => \&_from_probability
+);
+has 'fractional' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0,
+    trigger  => \&_from_fractional
+);
+has 'decimal' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0,
+    trigger  => \&_from_decimal
+);
+has 'win_break' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0,
+    trigger  => \&_from_win_break
+);
+has 'roi' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0,
+    trigger  => \&_from_roi
+);
+has 'moneyline' => (
+    isa      => 'Str',
+    is       => 'rw',
+    required => 0,
+    trigger  => \&_from_moneyline
+);
+has 'probability_not_rounded' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0
+);
+has 'fractional_not_rounded' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0
+);
+has 'decimal_not_rounded' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0
+);
+has 'win_break_not_rounded' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0
+);
+has 'roi_not_rounded' => (
+    isa      => 'Num',
+    is       => 'rw',
+    required => 0
+);
+has 'moneyline_not_rounded' => (
+    isa      => 'Str',
+    is       => 'rw',
+    required => 0
+);
 
 =over
 
-=item B<decimal_odds>
+=item B<decimal>
 
 Without parameter, return the decimal odds for the object instantiate with the parameter from the method B<new()>
 
 Example:
 
-	print $oc->decimal_odds . "\n";
+	print $oc->decimal . "\n";
 	
 With a parameter, re-initialise the object instance with that decimal value
 and return the new decimal odds value.
 
 Example:
 
-	print $oc->decimal_odds( 3 ) . "\n";
+	print $oc->decimal( 3 ) . "\n";
 	
 =back 
-
-=cut
-
-sub decimal_odds
-{
-    my ( $self, $val ) = @_;
-
-    if ( $val )
-    {
-        $self->{ decimal } = $val;
-        _from_decimal( $self );
-    }
-
-    return $self->{ decimal_rounded };
-}
 
 =over
 
@@ -196,195 +166,129 @@ Example:
 		
 =back 
 
-=cut
-
-sub roi
-{
-    my ( $self, $val ) = @_;
-
-    if ( $val )
-    {
-        $self->{ roi } = $val;
-        _from_roi( $self );
-    }
-
-    return $self->{ roi_rounded };
-}
-
 =over
 
-=item B<fractional_odds>
+=item B<fractional>
 
 Without parameter, return the fractional odds for the object instantiate with the parameter from the method B<new()>
 
 Example:
 
-	print $oc->fractional_odds . "\n";
+	print $oc->fractional . "\n";
 	
 With a parameter, re-initialise the object instance with that fractional odds value
 and return the new fractional odds value
 
 Example:
 
-	print $oc->fractional_odds( 50 ) . "\n";
+	print $oc->fractional( 50 ) . "\n";
 			
 =back 
 
-=cut
-
-sub fractional_odds
-{
-    my ( $self, $val ) = @_;
-
-    if ( $val )
-    {
-        $self->{ fractional } = $val;
-        _from_fractional( $self );
-    }
-
-    return $self->{ fractional_rounded };
-}
-
 =over
 
-=item B<win_break_odds>
+=item B<win_break>
 
 Without parameter, return the win to break even odds for the object instantiate with the parameter from the method B<new()>
 
 Example:
 
-	print $oc->win_break_odds . "\n";
+	print $oc->win_break . "\n";
 	
 With a parameter, re-initialise the object instance with that win_break odds value
 and return the new win to break odds value
 
 Example:
 
-	print $oc->win_break_odds( 90 ) . "\n";
+	print $oc->win_break( 90 ) . "\n";
 			
 =back 
 
-=cut
-
-sub win_break_odds
-{
-    my ( $self, $val ) = @_;
-
-    if ( $val )
-    {
-        $self->{ win_break } = $val;
-        _from_win_break( $self );
-    }
-
-    return $self->{ win_break_rounded };
-}
-
 =over
 
-=item B<probability_odds>
+=item B<probability>
 
 Without parameter, return the probability odds for the object instantiate with the parameter from the method B<new()>
 
 Example:
 
-	print $oc->probability_odds . "\n";
+	print $oc->probability . "\n";
 	
 With a parameter, re-initialise the object instance with that probability odds value
 and return the new win to probability odds value
 
 Example:
 
-	print $oc->probability_odds( 90 ) . "\n";		
+	print $oc->probability( 90 ) . "\n";		
 	
 =back 
 
-=cut
-
-sub probability_odds
-{
-    my ( $self, $val ) = @_;
-
-    if ( $val )
-    {
-        $self->{ probability } = $val;
-        _from_probability( $self );
-    }
-
-    return $self->{ probability_rounded };
-}
-
 =over
 
-=item B<money_line_odds>
+=item B<moneyline>
 
 Without parameter, return the moneyline odds for the object instantiate with the parameter from the method B<new()>
 
 Example:
 
-	print $oc->money_line_odds . "\n";
+	print $oc->moneyline . "\n";
 	
 With a parameter, re-initialise the object instance with that moneyline odds value
 and return the new win to moneyline odds value
 
 Example:
 
-	print $oc->moneyline_odds( 90 ) . "\n";		
+	print $oc->moneyline( 90 ) . "\n";		
 	
 =back 
 
 =cut
 
-sub money_line_odds
-{
-    my ( $self, $val ) = @_;
-
-    my @head = ( '', '+/-', '+' );
-    my $head_ind = 1 + ( $self->{ moneyline } <=> 100 );
-
-    if ( $val )
-    {
-        $self->{ moneyline } = $val;
-        _from_moneyline( $self );
-    }
-
-    return $head[$head_ind] . $self->{ moneyline };
-}
-
 sub _from_probability
 {
     my ( $self ) = @_;
 
-    $self->{ probability_rounded } = sprintf( "%.2f", $self->{ probability } );
-    if (  $self->{ probability } == 0 )
+    $self->{ probability_not_rounded } = $self->{ probability };
+    $self->{ probability } = sprintf( "%.2f", $self->{ probability } );
+    if ( $self->{ probability_not_rounded } < 0 )
     {
-    $self->{ decimal } = $self->{ decimal_rounded } ='Inf.';
-    $self->{ roi } = $self->{ roi_rounded }='Inf.';
-    $self->{ fractional } =0;
-    $self->{ fractional_rounded }  = sprintf( "%.2f", $self->{ fractional } );
-    $self->{ moneyline } = '-Inf.';
+        croak 'No negative probabilities';
+
     }
-    elsif (  $self->{ probability } == 1 )
+    elsif ( $self->{ probability_not_rounded } > 1 )
     {
-    $self->{ decimal } = 1;
-    $self->{ decimal_rounded }     = sprintf( "%.2f", $self->{ decimal } );
-    $self->{ roi } = 0;
-    $self->{ roi_rounded }         = sprintf( "%.0f%%", $self->{ roi } );
-    $self->{ fractional } =0;
-    $self->{ fractional_rounded }  = sprintf( "%.2f", $self->{ fractional } );
-    $self->{ moneyline } = '+Inf.'; 
+        croak 'No probabilities > 1';
+    }
+    elsif ( $self->{ probability_not_rounded } == 0 )
+    {
+        $self->{ decimal } = $self->{ decimal_not_rounded } = 'Inf.';
+        $self->{ roi }     = $self->{ roi_not_rounded }     = 'Inf.';
+        $self->{ fractional_not_rounded } = 0;
+        $self->{ fractional }             = sprintf( "%.2f", $self->{ fractional_not_rounded } );
+        $self->{ moneyline }              = '-Inf.';
+    }
+    elsif ( $self->{ probability_not_rounded } == 1 )
+    {
+        $self->{ decimal_not_rounded }    = 1;
+        $self->{ decimal }                = sprintf( "%.2f", $self->{ decimal_not_rounded } );
+        $self->{ roi_not_rounded }        = 0;
+        $self->{ roi }                    = sprintf( "%.0f%%", $self->{ roi_not_rounded } );
+        $self->{ fractional_not_rounded } = 0;
+        $self->{ fractional }             = sprintf( "%.2f", $self->{ fractional_not_rounded } );
+        $self->{ moneyline }              = '+Inf.';
     }
     else
     {
-    $self->{ win_break }           = $self->{ probability } * 100;
-    $self->{ win_break_rounded }   = sprintf( "%.2f", $self->{ win_break } );
-    $self->{ decimal }             = (100 / $self->{ win_break } );
-    $self->{ fractional }          = $self->{ decimal } - 1;
-    $self->{ decimal_rounded }     = sprintf( "%.2f", $self->{ decimal } );
-    $self->{ fractional_rounded }  = sprintf( "%.2f", $self->{ fractional } );
-    $self->{ moneyline }           = $self->{ fractional } < 1 ? -(100 / $self->{ fractional } ) : $self->{ fractional } * 100 ;
-    $self->{ roi }                 = 100 * $self->{ fractional };
-    $self->{ roi_rounded }         = sprintf( "%.0f%%", $self->{ roi }  );
-}
+        $self->{ win_break_not_rounded }  = $self->{ probability_not_rounded } * 100;
+        $self->{ win_break }              = sprintf( "%.2f", $self->{ win_break_not_rounded } );
+        $self->{ decimal_not_rounded }    = ( 100 / $self->{ win_break_not_rounded } );
+        $self->{ fractional_not_rounded } = $self->{ decimal_not_rounded } - 1;
+        $self->{ decimal }                = sprintf( "%.2f", $self->{ decimal_not_rounded } );
+        $self->{ fractional }             = sprintf( "%.2f", $self->{ fractional_not_rounded } );
+        $self->{ moneyline }              = $self->{ fractional_not_rounded } < 1 ? -( 100 / $self->{ fractional_not_rounded } ) : $self->{ fractional_not_rounded } * 100;
+        $self->{ roi_not_rounded }        = 100 * $self->{ fractional_not_rounded };
+        $self->{ roi }                    = sprintf( "%.0f%%", $self->{ roi_not_rounded } );
+    }
 
     return $self;
 }
@@ -392,26 +296,34 @@ sub _from_probability
 sub _from_roi
 {
     my ( $self ) = @_;
+    $self->{ roi_not_rounded }         = $self->{ roi };
+    $self->{ roi }                     = sprintf( "%.0f%%", $self->{ roi_not_rounded } );
+    $self->{ fractional_not_rounded }  = $self->{ roi_not_rounded } / 100;
+    $self->{ fractional }              = sprintf( "%.2f", $self->{ fractional_not_rounded } );
+    $self->{ decimal_not_rounded }     = $self->{ fractional_not_rounded } + 1;
+    $self->{ decimal }                 = sprintf( "%.2f", $self->{ decimal_not_rounded } );
+    $self->{ moneyline_not_rounded }   = $self->{ fractional_not_rounded } < 1 ? -( 100 / $self->{ fractional_not_rounded } ) : $self->{ fractional_not_rounded } * 100;
+    $self->{ moneyline }               = sprintf( "%.2f", $self->{ moneyline_not_rounded } );
+    $self->{ win_break_not_rounded }   = 100 / ( $self->{ fractional_not_rounded } + 1 );
+    $self->{ win_break }               = sprintf( "%.2f", $self->{ win_break_not_rounded } );
+    $self->{ probability_not_rounded } = $self->{ win_break_not_rounded } / 100;
+    $self->{ probability }             = sprintf( "%.2f", $self->{ probability_not_rounded } );
 
-    $self->{ roi_rounded }         = sprintf( "%.2f", $self->{ roi } );
-    $self->{ fractional }          = $self->{ roi } / 100;
-    $self->{ fractional_rounded }  = sprintf( "%.2f", $self->{ fractional } );
-    $self->{ decimal }             = $self->{ fractional } + 1;
-    $self->{ decimal_rounded }     = sprintf( "%.2f", $self->{ decimal } );
-    $self->{ moneyline }           = $self->{ fractional } < 1 ? -(100 / $self->{ fractional } ) : $self->{ fractional } * 100 ;
-    $self->{ win_break }           = 100 / ( $self->{ fractional } + 1 );
-    $self->{ win_break_rounded }   = sprintf( "%.2f", $self->{ win_break } );
-    $self->{ probability }         = $self->{ win_break } / 100;
-    $self->{ probability_rounded } = sprintf( "%.2f", $self->{ probability } );
-
-     return $self;
+    return $self;
 }
 
 sub _from_win_break
 {
     my ( $self ) = @_;
 
-    $self->{ probability } = $self->{ win_break } / 100;
+    if ( $self->{ win_break } < 0 || $self->{ win_break } >= 100 )
+    {
+        croak "Win_break must in the range ]0,100[";
+    }
+
+    $self->{ win_break_not_rounded } = $self->{ win_break };
+    $self->{ win_break }             = sprintf( "%.2f", $self->{ win_break_not_rounded } );
+    $self->{ probability }           = $self->{ win_break_not_rounded } / 100;
     _from_probability( $self );
 
     return $self;
@@ -421,7 +333,14 @@ sub _from_fractional
 {
     my ( $self ) = @_;
 
-    $self->{ roi } = 100 * $self->{ fractional };
+    if ( $self->{ fractional } < 0 )
+    {
+        croak 'Fractional must be a positive value';
+    }
+
+    $self->{ fractional_not_rounded } = $self->{ fractional };
+    $self->{ fractional }             = sprintf( "%.2f", $self->{ fractional_not_rounded } );
+    $self->{ roi }                    = 100 * $self->{ fractional_not_rounded };
     _from_roi( $self );
 
     return $self;
@@ -431,7 +350,14 @@ sub _from_decimal
 {
     my ( $self ) = @_;
 
-    $self->{ fractional } = $self->{ decimal } - 1;
+    if ( $self->{ decimal } < 1 )
+    {
+        croak "Decimal must be greater than 1";
+    }
+
+    $self->{ decimal_not_rounded } = $self->{ decimal };
+    $self->{ decimal }             = sprintf( "%.2f", $self->{ decimal_not_rounded } );
+    $self->{ fractional }          = $self->{ decimal_not_rounded } - 1;
     _from_fractional( $self );
 
     return $self;
@@ -452,9 +378,10 @@ sub _from_moneyline
             carp "Moneyline value must be a numerical value positive, negative or the special value '+/-100'";
         }
     }
-        
-     $self->{ fractional }           = $self->{ moneyline } < 0 ? -(100 / $self->{ moneyline } ) : $self->{ moneyline } * 100 ;
 
+    $self->{ moneyline_not_rounded } = $self->{ moneyline };
+    $self->{ moneyline }             = sprintf( "%.2f", $self->{ moneyline_not_rounded } );
+    $self->{ fractional }            = $self->{ moneyline_not_rounded } < 0 ? -( 100 / $self->{ moneyline_not_rounded } ) : $self->{ moneyline_not_rounded } / 100;
     _from_fractional( $self );
 
     return $self;
@@ -474,23 +401,23 @@ sub _from_moneyline
 	my $p = 0.5;
 	my $oc = OddsConverter->new( probability => $p );
 	say "Test probability ($p)";
-	say "decimal=" . $oc->decimal_odds;  
-	say "fractional=" . $oc->fractional_odds;
-	say "probability=" . $oc->probability_odds;
-	say "win_break=" . $oc->win_break_odds;
+	say "decimal=" . $oc->decimal;  
+	say "fractional=" . $oc->fractional;
+	say "probability=" . $oc->probability;
+	say "win_break=" . $oc->win_break;
 	say "roi=" . $oc->roi;
-	say "money line=" . $oc->money_line_odds;
+	say "money line=" . $oc->money_line;
 	say "";
 	
 	my $m = '-300';
 	say "new from moneyline ($m)";
-	say "new money line=" . $oc->money_line_odds($m);
-	say "decimal=" . $oc->decimal_odds;  
-	say "fractional=" . $oc->fractional_odds;
-	say "probability=" . $oc->probability_odds;
-	say "win_break=" . $oc->win_break_odds;
+	say "new money line=" . $oc->money_line($m);
+	say "decimal=" . $oc->decimal;  
+	say "fractional=" . $oc->fractional;
+	say "probability=" . $oc->probability;
+	say "win_break=" . $oc->win_break;
 	say "roi=" . $oc->roi;
-	say "money line=" . $oc->money_line_odds;
+	say "money line=" . $oc->money_line;
 	say "";
 	
 

@@ -11,14 +11,14 @@ foreach my $ind ( 0 .. $#PROBABILITIES )
 {
     subtest "probability " . $PROBABILITIES[$ind] => sub {
         my $oc = new_ok( 'OddsConverter' => [ probability => $PROBABILITIES[$ind] ] );
-        is( $oc->decimal_odds, $DECIMALS[$ind], 'decimal odds are ' . $DECIMALS[$ind] );
+        is( $oc->decimal, $DECIMALS[$ind], 'decimal odds are ' . $DECIMALS[$ind] );
         is( $oc->roi,          $ROIS[$ind],     'ROI is ' . $ROIS[$ind] );
     };
 }
 
 subtest 'ROI 900' => sub {
     my $oc = new_ok( 'OddsConverter' => [ roi => 900 ] );
-    is( $oc->decimal_odds,   '10.00', 'decimal odds are 10.00' );
-    is( $oc->win_break_odds, '10.00', 'Win break is 10%' );
+    is( $oc->decimal,   '10.00', 'decimal odds are 10.00' );
+    is( $oc->win_break, '10.00', 'Win break is 10%' );
 };
 

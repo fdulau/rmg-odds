@@ -25,6 +25,7 @@
          },
          "requires" : {
             "Carp" : "0",
+            "Moose" : "0",
             "Scalar::Util" : "0",
             "perl" : "5.005_03"
          }
@@ -33,7 +34,7 @@
    "provides" : {
       "OddsConverter" : {
          "file" : "lib/OddsConverter.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       }
    },
    "release_status" : "stable",
@@ -42,5 +43,5 @@
          "http://www.gnu.org/licenses/old-licenses/gpl-1.0.txt"
       ]
    },
-   "version" : "0.01"
+   "version" : "0.02"
 }

@@ -7,4 +7,3 @@ t/020_instance.t
 t/030_value.t
 META.yml
 META.json
-Build.PL
