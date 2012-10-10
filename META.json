@@ -1,0 +1,46 @@
+{
+   "abstract" : "ODD converter ( see https://en.wikipedia.org/wiki/Fixed-odds_betting )",
+   "author" : [
+      "DULAUNOY Fabrice <fabrice _at_ dulaunoy _dot_ com>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.4001, CPAN::Meta::Converter version 2.120921",
+   "license" : [
+      "open_source"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "OddsConverter",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.40"
+         }
+      },
+      "runtime" : {
+         "recommends" : {
+            "Data::Dumper" : "0"
+         },
+         "requires" : {
+            "Carp" : "0",
+            "Scalar::Util" : "0",
+            "perl" : "5.005_03"
+         }
+      }
+   },
+   "provides" : {
+      "OddsConverter" : {
+         "file" : "lib/OddsConverter.pm",
+         "version" : "0.01"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://www.gnu.org/licenses/old-licenses/gpl-1.0.txt"
+      ]
+   },
+   "version" : "0.01"
+}

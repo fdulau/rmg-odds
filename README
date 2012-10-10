@@ -1,0 +1,173 @@
+NAME
+    OddsConverter
+
+SYNOPSIS
+        my $oc = OddsConverter->new(probability => 0.5);
+        print $oc->decimal_odds;    # '2.00' (always to 2 decimal places)
+        print $oc->roi;             # '100%' (always whole numbers or 'Inf.')
+
+COMMENT
+        This version use the 'old fashion' module declaration.
+        This easy the possibility to create a self contained package with PAR to distribute the module on computer with obsolete OS/PERL version.
+
+METHODS
+    new()
+        Instanciate a new OddsConverter object a parameter is needed to
+        start the conversion.
+
+        List of possible parameters:
+            *probability*
+            *fractional*
+            *decimal*
+            *win_break*
+            *moeny_line*
+            *roi*
+
+            Example:
+
+                    my $oc = OddsConverter->new( probability => 0.5 );
+
+    decimal_odds
+        Without parameter, return the decimal odds for the object
+        instantiate with the parameter from the method new()
+
+        Example:
+
+                print $oc->decimal_odds . "\n";
+        
+        With a parameter, re-initialise the object instance with that
+        decimal value and return the new decimal odds value.
+
+        Example:
+
+                print $oc->decimal_odds( 3 ) . "\n";
+        
+    roi Without parameter, return the roi ( return on investment ) for the
+        object instantiate with the parameter from the method new()
+
+        Example:
+
+                print $oc->roi . "\n";
+        
+        With a parameter, re-initialise the object instance with that roi
+        value and return the new roi value.
+
+        Example:
+
+                print $oc->roi( 50 ) . "\n";
+                
+    fractional_odds
+        Without parameter, return the fractional odds for the object
+        instantiate with the parameter from the method new()
+
+        Example:
+
+                print $oc->fractional_odds . "\n";
+        
+        With a parameter, re-initialise the object instance with that
+        fractional odds value and return the new fractional odds value
+
+        Example:
+
+                print $oc->fractional_odds( 50 ) . "\n";
+                        
+    win_break_odds
+        Without parameter, return the win to break even odds for the object
+        instantiate with the parameter from the method new()
+
+        Example:
+
+                print $oc->win_break_odds . "\n";
+        
+        With a parameter, re-initialise the object instance with that
+        win_break odds value and return the new win to break odds value
+
+        Example:
+
+                print $oc->win_break_odds( 90 ) . "\n";
+                        
+    probability_odds
+        Without parameter, return the probability odds for the object
+        instantiate with the parameter from the method new()
+
+        Example:
+
+                print $oc->probability_odds . "\n";
+        
+        With a parameter, re-initialise the object instance with that
+        probability odds value and return the new win to probability odds
+        value
+
+        Example:
+
+                print $oc->probability_odds( 90 ) . "\n";               
+        
+    money_line_odds
+        Without parameter, return the moneyline odds for the object
+        instantiate with the parameter from the method new()
+
+        Example:
+
+                print $oc->money_line_odds . "\n";
+        
+        With a parameter, re-initialise the object instance with that
+        moneyline odds value and return the new win to moneyline odds value
+
+        Example:
+
+                print $oc->moneyline_odds( 90 ) . "\n";         
+        
+EXAMPLE
+            #!/usr/bin/perl
+
+            use strict;
+            use feature qw( say );
+            use Data::Dumper;
+
+            use OddsConverter;
+
+            my $p = 0.5;
+            my $oc = OddsConverter->new( probability => $p );
+            say "Test probability ($p)";
+            say "decimal=" . $oc->decimal_odds;  
+            say "fractional=" . $oc->fractional_odds;
+            say "probability=" . $oc->probability_odds;
+            say "win_break=" . $oc->win_break_odds;
+            say "roi=" . $oc->roi;
+            say "money line=" . $oc->money_line_odds;
+            say "";
+        
+            my $m = '-300';
+            say "new from moneyline ($m)";
+            say "new money line=" . $oc->money_line_odds($m);
+            say "decimal=" . $oc->decimal_odds;  
+            say "fractional=" . $oc->fractional_odds;
+            say "probability=" . $oc->probability_odds;
+            say "win_break=" . $oc->win_break_odds;
+            say "roi=" . $oc->roi;
+            say "money line=" . $oc->money_line_odds;
+            say "";
+        
+AUTHOR
+    Fabrice Dulaunoy <fabrice@dulaunoy.com>
+
+    October 2012
+
+LICENSE
+    Under the GNU GPL2
+
+        This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public 
+        License as published by the Free Software Foundation; either version 2 of the License, 
+        or (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+        without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+        See the GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License along with this program; 
+        if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+         OddsConverter   Copyright (C) 2010 DULAUNOY Fabrice.  OddsConverter comes with ABSOLUTELY NO WARRANTY; 
+        for details See: L<http://www.gnu.org/licenses/gpl.html> 
+        This is free software, and you are welcome to redistribute it under certain conditions;
+   
